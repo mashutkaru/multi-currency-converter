@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Currency Studio | JPY · ILS · USD · EUR</title>
+  <style>
+    :root { color-scheme: dark; --bg: #0b1020; --panel: #151d32; --line: #2c3851; --ink: #f6f8ff; --muted: #98a9c8; --accent: #89e1cc; --warn: #ffcd8e; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: radial-gradient(ellipse 70% 55% at 80% 5%, #213452 0%, transparent 70%), var(--bg); color: var(--ink); }
+    main { width: min(940px, calc(100% - 36px)); margin: 0 auto; padding: clamp(42px, 8vw, 90px) 0 48px; }
+    .eyebrow { display: flex; gap: 9px; align-items: center; color: var(--accent); font-weight: 750; font-size: .79rem; letter-spacing: .17em; text-transform: uppercase; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 18px #89e1cc80; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.5rem, 7vw, 4.75rem); line-height: 1.05; letter-spacing: -.065em; }
+    .intro { color: var(--muted); max-width: 560px; line-height: 1.6; font-size: 1.03rem; margin: 0 0 32px; }
+    .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
+    .card { background: linear-gradient(150deg, #1b2740, var(--panel)); border: 1px solid var(--line); border-radius: 22px; padding: 22px; min-width: 0; transition: border-color .2s, transform .2s; }
+    .card:focus-within { border-color: var(--accent); transform: translateY(-2px); }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .flag { font-size: 2rem; line-height: 1; }
+    .code { color: var(--muted); font-size: .84rem; letter-spacing: .11em; font-weight: 750; }
+    .name { color: #b6c3db; font-size: .95rem; margin-top: 24px; }
+    .entry { display: flex; align-items: baseline; gap: 7px; margin-top: 8px; }
+    .symbol { font-size: 1.6rem; color: var(--accent); font-weight: 750; flex-shrink: 0; }
+    input { width: 100%; min-width: 0; appearance: textfield; background: transparent; border: 0; outline: 0; color: var(--ink); font: 720 clamp(1.5rem, 3.4vw, 2.4rem)/1.2 inherit; font-size: clamp(1.35rem, 2.5vw, 2rem); font-weight: 730; letter-spacing: -.04em; padding: 0; }
+    input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input::placeholder { color: #7a87a3; }
+    .hint { font-size: .75rem; color: var(--muted); margin-top: 20px; }
+    .toolbar { margin-top: 22px; padding: 17px 20px; border: 1px solid var(--line); border-radius: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; background: #121a2bcf; }
+    .status { color: var(--muted); font-size: .91rem; display: flex; align-items: center; gap: 9px; }
+    .status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .status.error::before { background: var(--warn); }
+    button { cursor: pointer; font: inherit; font-weight: 700; color: var(--ink); border: 1px solid #40516c; background: #25334d; padding: 10px 15px; border-radius: 10px; transition: background .15s; }
+    button:hover { background: #344767; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .details { margin-top: 31px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+    .details strong { font-size: .95rem; }
+    .rate-list { display: flex; gap: 16px 24px; flex-wrap: wrap; color: var(--muted); font-size: .9rem; margin-top: 9px; }
+    footer { margin-top: 45px; font-size: .8rem; color: #7f91b1; line-height: 1.6; }
+    a { color: #b2f7e6; }
+    .calculator { margin-top: 22px; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(150deg, #1b2740, var(--panel)); padding: 22px; }
+    .calc-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+    .calc-heading h2 { font-size: 1.12rem; margin: 0; }
+    .calc-target { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .85rem; }
+    .calc-target select { background: #263650; color: var(--ink); border: 1px solid #40516c; border-radius: 8px; padding: 8px; font: inherit; }
+    .calc-screen { text-align: right; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: #0d1425; margin-bottom: 12px; min-height: 86px; }
+    .calc-history { min-height: 20px; font-size: .8rem; color: var(--muted); }
+    .calc-value { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 740; word-break: break-all; font-variant-numeric: tabular-nums; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+    .calc-grid button { min-height: 48px; font-size: 1.16rem; background: #25334d; }
+    .calc-grid button.operation { color: var(--accent); }
+    .calc-grid button.equals { background: var(--accent); color: #091b20; border-color: var(--accent); }
+    .calc-grid button.utility { color: #c4d0e5; background: #1b2941; }
+    .use-result { width: 100%; margin-top: 12px; background: #254d50; border-color: #3e928a; color: #c7fff2; }
+    @media (min-width: 701px) and (max-width: 1000px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 700px) { .cards { grid-template-columns: 1fr; gap: 12px; } .card { padding: 18px 20px; } .name { margin-top: 14px; } .hint { margin-top: 12px; } input { font-size: 2.1rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow"><span class="dot"></span> Currency studio</div>
+    <h1>Four currencies.</h1>
+    <section class="cards" aria-label="Currency amounts">
+      <article class="card"><div class="top"><span class="flag" aria-hidden="true">🇯🇵</span><span class="code">JPY</span></div><div class="name">Japanese yen</div><label class="entry"><span class="symbol">¥</span><input id="JPY" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Japanese yen amount" placeholder="0" /></label><div class="hint">Edit this amount</div></article>
+      <article class="card"><div class="top"><span class="flag" aria-hidden="true">🇮🇱</span><span class="code">ILS</span></div><div class="name">Israeli shekel</div><label class="entry"><span class="symbol">₪</span><input id="ILS" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Israeli shekel amount" placeholder="0" /></label><div class="hint">Edit this amount</div></article>
+      <article class="card"><div class="top"><span class="flag" aria-hidden="true">🇺🇸</span><span class="code">USD</span></div><div class="name">US dollar</div><label class="entry"><span class="symbol">$</span><input id="USD" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="US dollar amount" placeholder="0" /></label><div class="hint">Edit this amount</div></article>
+      <article class="card"><div class="top"><span class="flag" aria-hidden="true">🇪🇺</span><span class="code">EUR</span></div><div class="name">Euro</div><label class="entry"><span class="symbol">€</span><input id="EUR" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Euro amount" placeholder="0" /></label><div class="hint">Edit this amount</div></article>
+    </section>
+    <section class="calculator" aria-label="Calculator">
+      <div class="calc-heading"><h2>Calculator</h2><label class="calc-target">Use result as <select id="calcTarget" aria-label="Result currency"><option value="JPY">JPY</option><option value="ILS">ILS</option><option value="USD" selected>USD</option><option value="EUR">EUR</option></select></label></div>
+      <div class="calc-screen" aria-live="polite"><div class="calc-history" id="calcHistory"></div><div class="calc-value" id="calcDisplay">0</div></div>
+      <div class="calc-grid" id="calcKeys">
+        <button type="button" class="utility" data-key="C">C</button><button type="button" class="utility" data-key="back">⌫</button><button type="button" class="utility" data-key="%">%</button><button type="button" class="operation" data-key="/">÷</button>
+        <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button><button type="button" class="operation" data-key="*">×</button>
+        <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button><button type="button" class="operation" data-key="-">−</button>
+        <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button><button type="button" class="operation" data-key="+">+</button>
+        <button type="button" class="utility" data-key="sign">±</button><button type="button" data-key="0">0</button><button type="button" data-key=".">.</button><button type="button" class="equals" data-key="=">=</button>
+      </div>
+      <button class="use-result" type="button" id="useResult">Use result in converter</button>
+    </section>
+    <div class="toolbar"><div class="status" id="status" aria-live="polite">Loading exchange rates…</div><button id="refresh" type="button">↻ Refresh rates</button></div>
+    <section class="details" aria-label="Current exchange rates"><div><strong>Exchange rates</strong><div class="rate-list"><span id="rateJPY">1 USD = — JPY</span><span id="rateILS">1 USD = — ILS</span><span id="rateEUR">1 USD = — EUR</span></div></div><div class="status" style="font-size: .82rem;">Rates are indicative</div></section>
+    <footer>Live rates require an internet connection. If unavailable, the converter uses clearly labeled saved or reference rates; these may differ from bank or card rates. Data providers: <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">ExchangeRate-API</a> and <a href="https://www.frankfurter.app" target="_blank" rel="noopener">Frankfurter</a>.</footer>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      const codes = ['JPY', 'ILS', 'USD', 'EUR'];
+      const inputs = Object.fromEntries(codes.map(code => [code, document.getElementById(code)]));
+      const status = document.getElementById('status');
+      const refresh = document.getElementById('refresh');
+      // Verified exchange-rate snapshot, used if the browser cannot reach rate APIs.
+      const snapshot = { USD: 1, JPY: 157.874, ILS: 3.2187, EUR: 0.89488, date: 'Nov 6, 2026', source: 'snapshot' };
+      let rates = { ...snapshot };
+      let active = 'USD';
+      let rawAmount = 100;
+      const fmt = n => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n);
+      const parse = value => {
+        const cleaned = value.replace(/,/g, '').replace(/\s/g, '').trim();
+        if (!cleaned || cleaned === '.' || cleaned === '-') return null;
+        const num = Number(cleaned);
+        return Number.isFinite(num) ? num : NaN;
+      };
+      const setStatus = (message, warning=false) => { status.textContent=message; status.classList.toggle('error',warning); };
+      function showRates() {
+        document.getElementById('rateJPY').textContent = `1 USD = ${fmt(rates.JPY)} JPY`;
+        document.getElementById('rateILS').textContent = `1 USD = ${fmt(rates.ILS)} ILS`;
+        document.getElementById('rateEUR').textContent = `1 USD = ${rates.EUR.toFixed(4)} EUR`;
+      }
+      function calculate() {
+        for (const code of codes) {
+          if (code === active) continue;
+          inputs[code].value = rawAmount === null || Number.isNaN(rawAmount)
+            ? '' : fmt(rawAmount / rates[active] * rates[code]);
+        }
+      }
+      function formatEditingField(input) {
+        const before = input.value;
+        const caret = input.selectionStart ?? before.length;
+        const prefixLength = before.slice(0, caret).replace(/,/g, '').length;
+        // Keep a trailing decimal separator and typed decimal zeros while editing.
+        const clean = before.replace(/,/g, '').replace(/[^\d.]/g, '');
+        const dotIndex = clean.indexOf('.');
+        const normalized = dotIndex < 0 ? clean : clean.slice(0, dotIndex + 1) + clean.slice(dotIndex + 1).replace(/\./g, '');
+        const parts = normalized.split('.');
+        const grouped = (parts[0] || '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        const formatted = grouped + (parts.length > 1 ? '.' + parts[1] : '');
+        input.value = formatted;
+        let position = 0, seen = 0;
+        while (position < formatted.length && seen < prefixLength) {
+          if (formatted[position] !== ',') seen++;
+          position++;
+        }
+        input.setSelectionRange(position, position);
+      }
+      for (const code of codes) {
+        inputs[code].addEventListener('input', () => {
+          active = code;
+          formatEditingField(inputs[code]);
+          rawAmount = parse(inputs[code].value);
+          if (Number.isNaN(rawAmount)) {
+            setStatus('Enter a valid number.', true);
+            for (const other of codes) if (other !== code) inputs[other].value='';
+            return;
+          }
+          updateStatus();
+          calculate();
+        });
+        inputs[code].addEventListener('focus', () => {
+          active = code;
+          rawAmount = parse(inputs[code].value);
+        });
+        inputs[code].addEventListener('blur', () => {
+          if (rawAmount !== null && Number.isFinite(rawAmount)) inputs[code].value = fmt(rawAmount);
+        });
+      }
+      function updateStatus() {
+        if (rates.source === 'live') setStatus(`Live rates · updated ${rates.date}`);
+        else if (rates.source === 'cached') setStatus(`Saved rates · updated ${rates.date} · refresh for latest`, true);
+        else setStatus(`Using reference rates from ${rates.date} · refresh for latest`, true);
+      }
+      async function fetchWithTimeout(url) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
+        try {
+          const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return await response.json();
+        } finally { clearTimeout(timeout); }
+      }
+      async function loadRates() {
+        refresh.disabled = true;
+        setStatus('Checking latest rates…');
+        try {
+          let quote, date;
+          try {
+            const data = await fetchWithTimeout('https://open.er-api.com/v6/latest/USD');
+            if (data.result !== 'success' || !(data.rates?.JPY > 0) || !(data.rates?.ILS > 0) || !(data.rates?.EUR > 0)) throw Error('Invalid rates');
+            quote = data.rates;
+            date = data.time_last_update_utc ? new Date(data.time_last_update_utc).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) : 'latest';
+          } catch (_) {
+            try {
+              const data = await fetchWithTimeout('https://api.frankfurter.dev/v1/latest?base=USD&symbols=JPY,ILS,EUR');
+              if (!(data.rates?.JPY > 0) || !(data.rates?.ILS > 0) || !(data.rates?.EUR > 0)) throw Error('Invalid rates');
+              quote = data.rates; date = data.date;
+            } catch (_) {
+              const data = await fetchWithTimeout('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+              if (!(data.usd?.jpy > 0) || !(data.usd?.ils > 0) || !(data.usd?.eur > 0)) throw Error('Invalid rates');
+              quote = { JPY: data.usd.jpy, ILS: data.usd.ils, EUR: data.usd.eur }; date = data.date;
+            }
+          }
+          rates = { USD: 1, JPY: quote.JPY, ILS: quote.ILS, EUR: quote.EUR, date, source: 'live' };
+          try { localStorage.setItem('four-currency-rates', JSON.stringify(rates)); } catch (_) {}
+          showRates(); calculate(); updateStatus();
+        } catch (_) {
+          showRates(); calculate(); updateStatus();
+        } finally { refresh.disabled = false; }
+      }
+      try {
+        const saved = JSON.parse(localStorage.getItem('four-currency-rates') || 'null');
+        if (saved && saved.JPY > 0 && saved.ILS > 0 && saved.EUR > 0 && saved.date) {
+          rates = { USD: 1, JPY: saved.JPY, ILS: saved.ILS, EUR: saved.EUR, date: saved.date, source: 'cached' };
+        }
+      } catch (_) {}
+      // Basic calculator: sequential operations, decimals, percent and backspace.
+      const calcDisplay = document.getElementById('calcDisplay');
+      const calcHistory = document.getElementById('calcHistory');
+      const calcTarget = document.getElementById('calcTarget');
+      let calcEntry = '0', calcPrevious = null, calcOperator = null, calcNewEntry = false;
+      let calcError = false;
+      function showCalc() {
+        const n = Number(calcEntry);
+        calcDisplay.textContent = calcError ? 'Error' : (Number.isFinite(n) ? fmtEdit(calcEntry) : 'Error');
+        calcHistory.textContent = calcPrevious !== null && calcOperator ? `${fmt(calcPrevious)} ${{'/':'÷','*':'×','-':'−','+':'+'}[calcOperator]}` : '';
+      }
+      function fmtEdit(v) {
+        const neg = v.startsWith('-') ? '-' : '';
+        const pieces = v.replace(/^-/, '').split('.');
+        return neg + (pieces[0] || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (pieces.length > 1 ? '.' + pieces[1] : '');
+      }
+      function operate(a, b, op) {
+        if (op === '+') return a+b;
+        if (op === '-') return a-b;
+        if (op === '*') return a*b;
+        if (op === '/') return b === 0 ? NaN : a/b;
+        return b;
+      }
+      function calcKey(key) {
+        if (key === 'C') { calcEntry='0'; calcPrevious=null; calcOperator=null; calcNewEntry=false; calcError=false; showCalc(); return; }
+        if (calcError) return;
+        if (/^\d$/.test(key)) {
+          if (calcNewEntry) { calcEntry=key; calcNewEntry=false; }
+          else if (calcEntry.replace(/\D/g,'').length < 15) calcEntry=calcEntry==='0' ? key : calcEntry+key;
+        } else if (key === '.') {
+          if (calcNewEntry) { calcEntry='0.'; calcNewEntry=false; }
+          else if (!calcEntry.includes('.')) calcEntry+='.';
+        } else if (key === 'back') { calcEntry=calcNewEntry ? '0' : (calcEntry.length<=1 || calcEntry==='-0' ? '0' : calcEntry.slice(0,-1)); calcNewEntry=false; }
+        else if (key === 'sign') { calcEntry=String(-Number(calcEntry)); }
+        else if (key === '%') { calcEntry=String(Number(calcEntry)/100); }
+        else if (['+','-','*','/'].includes(key)) {
+          if (calcOperator && calcPrevious !== null && !calcNewEntry) {
+            const result=operate(calcPrevious, Number(calcEntry), calcOperator);
+            if (!Number.isFinite(result)) { calcError=true; showCalc(); return; }
+            calcEntry=String(Number(result.toPrecision(13)));
+          }
+          calcPrevious=Number(calcEntry); calcOperator=key; calcNewEntry=true;
+        } else if (key === '=' && calcOperator && calcPrevious !== null) {
+          const result=operate(calcPrevious, Number(calcEntry), calcOperator);
+          if (!Number.isFinite(result)) { calcError=true; showCalc(); return; }
+          calcEntry=String(Number(result.toPrecision(13)));
+          calcPrevious=null; calcOperator=null; calcNewEntry=true;
+        }
+        showCalc();
+      }
+      document.getElementById('calcKeys').addEventListener('click', e => {
+        const button=e.target.closest('button[data-key]');
+        if (button) calcKey(button.dataset.key);
+      });
+      document.getElementById('useResult').addEventListener('click', () => {
+        if (calcError || !Number.isFinite(Number(calcEntry))) return;
+        const code=calcTarget.value;
+        active=code; rawAmount=Number(calcEntry);
+        inputs[code].value=fmt(rawAmount);
+        calculate();
+        inputs[code].focus();
+      });
+      showCalc();
+      inputs.USD.value = '100';
+      showRates(); calculate(); updateStatus();
+      refresh.addEventListener('click', loadRates);
+      loadRates();
+    })();
+  </script>
+</body>
+</html>
