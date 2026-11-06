@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>Currency Studio | JPY · ILS · USD · EUR</title>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-F43JV3FHNS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-F43JV3FHNS');
+  </script>
   <style>
     :root { color-scheme: dark; --bg: #0b1020; --panel: #151d32; --line: #2c3851; --ink: #f6f8ff; --muted: #98a9c8; --accent: #89e1cc; --warn: #ffcd8e; }
     * { box-sizing: border-box; }
@@ -85,15 +93,32 @@
     .use-result { width: 100%; margin-top: 12px; background: #254d50; border-color: #3e928a; color: #c7fff2; }
     @media (max-width: 1140px) { main { padding-top: 118px; } }
     @media (min-width: 701px) and (max-width: 1000px) { .cards { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
-    @media (max-width: 700px) { .page-logo { height: 58px; top: 10px; left: 10px; } main { padding-top: 76px; } .cards { grid-template-columns: 1fr; gap: 12px; } .card { padding: 18px 20px; } .name { margin-top: 14px; } .add-calc { margin-top: 12px; font-size: .9rem; } input { font-size: 2.1rem; } .calc-main, .calc-side { flex-basis: 100%; width: 100%; } }
+    @media (max-width: 700px) {
+      main { padding-top: 18px; }
+      .currency-head { position: relative; }
+      .page-logo { position: absolute; top: -2px; right: 0; left: auto; height: 48px; }
+      h1 { font-size: 1.85rem; margin: 6px 58px 8px 0; }
+      .currency-actions { flex: 1 0 100%; margin: 0 0 12px 0; justify-content: flex-start; }
+      .cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .card { padding: 12px 10px; border-radius: 16px; }
+      .flag { font-size: 1.35rem; }
+      .code { font-size: .72rem; }
+      .name { margin-top: 8px; font-size: .78rem; }
+      .symbol { font-size: 1.15rem; }
+      .entry { margin-top: 4px; gap: 4px; }
+      input { font-size: 1.25rem; }
+      .add-calc { margin-top: 8px; padding: 6px 4px; font-size: .72rem; }
+      .calculator { margin-top: 12px; padding: 12px; }
+      .calc-main, .calc-side { flex-basis: 100%; width: 100%; }
+    }
   </style>
 </head>
 <body>
-  <img class="page-logo" src="jiat-logo.png" alt="Japan-Israel AgeTech">
   <main>
     <div class="eyebrow"><span class="dot"></span> Currency studio</div>
     <section class="currencies" aria-label="Four currencies">
       <div class="currency-head">
+        <img class="page-logo" src="jiat-logo.png" alt="Japan-Israel AgeTech">
         <h1>Four currencies.</h1>
         <div class="currency-actions">
           <button id="editCurrencies" type="button" aria-expanded="false" aria-controls="currencyEditor">✎ Edit currencies</button>
