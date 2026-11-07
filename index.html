@@ -869,5 +869,47 @@
       loadRates();
     })();
   </script>
+  <!-- Currency Studio: GA4 custom events -->
+  <script>
+    (function () {
+      "use strict";
+
+      function track(eventName, parameters = {}) {
+        if (typeof window.gtag === "function") {
+          window.gtag("event", eventName, {
+            send_to: "G-7J8ZHP8N7T",
+            ...parameters
+          });
+        }
+      }
+
+      // Track whichever currency amount the visitor selects.
+      document.addEventListener("focusin", function (event) {
+        const input = event.target;
+        if (input instanceof HTMLInputElement && input.dataset.code && input.closest(".cards")) {
+          track("currency_selected", { currency_code: input.dataset.code });
+        }
+      });
+
+      // Track calculator usage once per page visit.
+      let calculatorTracked = false;
+      document.addEventListener("click", function (event) {
+        const calculatorControl = event.target.closest("#calcKeys button, .calculator button");
+        if (calculatorControl && !calculatorTracked) {
+          calculatorTracked = true;
+          track("calculator_used");
+        }
+      });
+
+      // Track manual exchange-rate refreshes.
+      document.addEventListener("click", function (event) {
+        const button = event.target.closest("button");
+        if (!button) return;
+        if (button.id === "refresh" || /refresh rates/i.test(button.textContent || "")) {
+          track("rates_refreshed");
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
