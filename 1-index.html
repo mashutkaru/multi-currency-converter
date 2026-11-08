@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Currency" />
+  <title>Currency Studio | JPY · ILS · USD · EUR</title>
+  <!-- Google Tag Manager -->
+  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-5FRHSVZS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  </script>
+  <style>
+    :root { color-scheme: dark; --bg: #0b1020; --panel: #151d32; --line: #2c3851; --ink: #f6f8ff; --muted: #98a9c8; --accent: #89e1cc; --warn: #ffcd8e; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: radial-gradient(ellipse 70% 55% at 80% 5%, #213452 0%, transparent 70%), var(--bg); color: var(--ink); }
+    .page-logo { position: fixed; top: 16px; left: 16px; z-index: 5; height: 84px; width: auto; border-radius: 12px; }
+    main { width: min(940px, calc(100% - 36px)); margin: 0 auto; padding: clamp(42px, 8vw, 90px) 0 48px; }
+    .eyebrow { display: flex; gap: 9px; align-items: center; color: var(--accent); font-weight: 750; font-size: .79rem; letter-spacing: .17em; text-transform: uppercase; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 18px #89e1cc80; }
+    h1 { margin: 12px 0 16px; font-size: clamp(2.5rem, 7vw, 4.75rem); line-height: 1.05; letter-spacing: -.065em; }
+    .currency-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px 18px; flex-wrap: wrap; }
+    .currency-actions { display: flex; gap: 10px; margin: 0 0 22px auto; }
+    #reset, #editCurrencies { margin: 0; }
+    .currency-editor { margin: 0 0 16px; padding: 16px; border: 1px solid var(--line); border-radius: 18px; background: #121a2be6; }
+    .currency-editor[hidden] { display: none; }
+    .currency-editor p { margin: 0 0 12px; color: var(--muted); line-height: 1.45; }
+    .currency-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+    .choice { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; }
+    .choice small { color: var(--muted); font-weight: 560; }
+    .choice.on { border-color: var(--accent); background: #1c3d3a; color: #d8fff6; }
+    .choice.on small { color: #b7efe4; }
+    .editor-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .currency-search-wrap { flex: 1 1 220px; margin-right: auto; min-width: min(100%, 180px); }
+    .currency-search { width: 100%; background: #0d1425; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font-size: .95rem; font-weight: 640; letter-spacing: 0; line-height: 1.2; padding: 10px 12px; }
+    .currency-search::placeholder { color: #7a87a3; font-weight: 560; }
+    .search-results { max-height: 220px; overflow: auto; display: flex; flex-direction: column; gap: 4px; margin: 0 0 10px; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: #0d1425; }
+    .search-results[hidden] { display: none; }
+    .search-results .choice { width: 100%; justify-content: flex-start; }
+    .search-empty { margin: 0; padding: 8px 10px; color: var(--muted); }
+    .save-currencies { background: var(--accent); color: #091b20; border-color: var(--accent); }
+    .save-currencies:hover { background: #b6fff0; }
+    .intro { color: var(--muted); max-width: 560px; line-height: 1.6; font-size: 1.03rem; margin: 0 0 32px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 13px; }
+    .card { background: linear-gradient(150deg, #1b2740, var(--panel)); border: 1px solid var(--line); border-radius: 22px; padding: 22px; min-width: 0; transition: border-color .2s, transform .2s; }
+    .card:focus-within { border-color: var(--accent); transform: translateY(-2px); }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .flag { font-size: 2rem; line-height: 1; }
+    .code { color: var(--muted); font-size: .84rem; letter-spacing: .11em; font-weight: 750; }
+    .name { color: #b6c3db; font-size: .95rem; margin-top: 24px; }
+    .entry { display: flex; align-items: baseline; gap: 7px; margin-top: 8px; }
+    .symbol { font-size: 1.6rem; color: var(--accent); font-weight: 750; flex-shrink: 0; }
+    input { width: 100%; min-width: 0; appearance: textfield; background: transparent; border: 0; outline: 0; color: var(--ink); font: 720 clamp(1.5rem, 3.4vw, 2.4rem)/1.2 inherit; font-size: clamp(1.35rem, 2.5vw, 2rem); font-weight: 730; letter-spacing: -.04em; padding: 0; }
+    input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input::placeholder { color: #7a87a3; }
+    .add-calc { width: 100%; margin-top: 16px; padding: 8px 6px; font-size: .78rem; background: #254d50; border-color: #3e928a; color: #c7fff2; }
+    .toolbar { margin-top: 22px; padding: 17px 20px; border: 1px solid var(--line); border-radius: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; background: #121a2bcf; }
+    .status { color: var(--muted); font-size: .91rem; display: flex; align-items: center; gap: 9px; }
+    .status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .status.error::before { background: var(--warn); }
+    button { cursor: pointer; font: inherit; font-weight: 700; color: var(--ink); border: 1px solid #40516c; background: #25334d; padding: 10px 15px; border-radius: 10px; transition: background .15s; }
+    button:hover { background: #344767; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .details { margin-top: 31px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+    .details strong { font-size: .95rem; }
+    .rate-list { display: flex; gap: 16px 24px; flex-wrap: wrap; color: var(--muted); font-size: .9rem; margin-top: 9px; }
+    footer { margin-top: 45px; font-size: .8rem; color: #7f91b1; line-height: 1.6; }
+    a { color: #b2f7e6; }
+    .calculator { margin-top: 22px; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(150deg, #1b2740, var(--panel)); padding: 16px; }
+    .calc-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .calc-heading h2 { font-size: 1.12rem; margin: 0; }
+    .calc-target { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .85rem; }
+    .calc-target select { background: #263650; color: var(--ink); border: 1px solid #40516c; border-radius: 8px; padding: 8px; font: inherit; }
+    .calc-layout { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+    .calc-main { flex: 0 1 300px; width: min(100%, 300px); }
+    .calc-side { flex: 1 1 280px; min-width: min(100%, 280px); }
+    .calc-side-label { color: var(--muted); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 750; margin: 2px 0 8px; }
+    .calc-screen { text-align: right; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; background: #0d1425; margin-bottom: 8px; min-height: 78px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .calc-screen-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; min-height: 22px; }
+    .calc-memory { font-size: .72rem; color: var(--accent); font-weight: 750; }
+    .calc-history { min-height: 22px; flex: 1; font-size: .95rem; line-height: 1.25; color: var(--ink); overflow-wrap: anywhere; }
+    .calc-value { font-size: 1.45rem; font-weight: 740; word-break: break-all; font-variant-numeric: tabular-nums; }
+    .calc-grid, .calc-extra { display: grid; gap: 6px; }
+    .calc-grid { grid-template-columns: repeat(4, 1fr); }
+    .calc-extra { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+    .calc-grid button, .calc-extra button { min-height: 46px; padding: 4px; font-size: .98rem; border-radius: 8px; background: #25334d; }
+    .calc-grid button.operation, .calc-extra button.operation { color: var(--accent); }
+    .calc-grid button.equals { background: var(--accent); color: #091b20; border-color: var(--accent); }
+    .calc-grid button.utility, .calc-extra button.utility { color: #c4d0e5; background: #1b2941; }
+    .use-result { width: 100%; margin-top: 12px; background: #254d50; border-color: #3e928a; color: #c7fff2; }
+    @media (max-width: 1140px) { main { padding-top: 118px; } }
+    @media (min-width: 701px) and (max-width: 1000px) { .cards { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
+    @media (max-width: 700px) {
+      main { padding-top: 18px; }
+      .currency-head { position: relative; }
+      .page-logo { position: absolute; top: -2px; right: 0; left: auto; height: 48px; }
+      h1 { font-size: 1.85rem; margin: 6px 58px 8px 0; }
+      .currency-actions { flex: 1 0 100%; margin: 0 0 12px 0; justify-content: flex-start; }
+      .cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .card { padding: 12px 10px; border-radius: 16px; }
+      .flag { font-size: 1.35rem; }
+      .code { font-size: .72rem; }
+      .name { margin-top: 8px; font-size: .78rem; }
+      .symbol { font-size: 1.15rem; }
+      .entry { margin-top: 4px; gap: 4px; }
+      input { font-size: 1.25rem; }
+      .add-calc { margin-top: 8px; padding: 6px 4px; font-size: .72rem; }
+      .calculator { margin-top: 12px; padding: 12px; }
+      .calc-main, .calc-side { flex-basis: 100%; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow"><span class="dot"></span> Currency studio</div>
+    <section class="currencies" aria-label="Four currencies">
+      <div class="currency-head">
+        <img class="page-logo" src="jiat-logo.png" alt="Japan-Israel AgeTech">
+        <h1>Four currencies.</h1>
+        <div class="currency-actions">
+          <button id="editCurrencies" type="button" aria-expanded="false" aria-controls="currencyEditor">✎ Edit currencies</button>
+          <button id="reset" type="button">↺ Reset</button>
+        </div>
+      </div>
+      <div id="currencyEditor" class="currency-editor" hidden>
+        <p>Choose which currencies to show. Turn a currency on to add it, or off to remove it.</p>
+        <div id="currencyChoices" class="currency-choices"></div>
+        <p id="editorNote" class="editor-note"></p>
+        <div id="currencyResults" class="search-results" hidden></div>
+        <div class="editor-actions">
+          <div class="currency-search-wrap">
+            <input id="currencySearch" class="currency-search" type="search" placeholder="Search more currencies" aria-label="Search currencies" aria-controls="currencyResults" autocomplete="off" spellcheck="false">
+          </div>
+          <button id="cancelCurrencies" type="button">Cancel</button>
+          <button id="saveCurrencies" class="save-currencies" type="button">Save</button>
+        </div>
+      </div>
+      <div class="cards"></div>
+    </section>
+    <section class="calculator" aria-label="Calculator">
+      <div class="calc-heading"><h2>Calculator</h2><label class="calc-target">Use result as <select id="calcTarget" aria-label="Result currency"><option value="JPY">JPY</option><option value="ILS">ILS</option><option value="USD" selected>USD</option><option value="EUR">EUR</option></select></label></div>
+      <div class="calc-screen" aria-live="polite"><div class="calc-screen-top"><span class="calc-memory" id="calcMemory"></span><div class="calc-history" id="calcHistory"></div></div><div class="calc-value" id="calcDisplay">0</div></div>
+      <div class="calc-layout" id="calcKeys">
+        <div class="calc-main">
+          <div class="calc-grid">
+            <button type="button" class="utility" data-key="C">C</button><button type="button" class="utility" data-key="back">⌫</button><button type="button" class="utility" data-key="%">%</button><button type="button" class="operation" data-key="/">÷</button>
+            <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button><button type="button" class="operation" data-key="*">×</button>
+            <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button><button type="button" class="operation" data-key="-">−</button>
+            <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button><button type="button" class="operation" data-key="+">+</button>
+            <button type="button" class="utility" data-key="sign">±</button><button type="button" data-key="0">0</button><button type="button" data-key=".">.</button><button type="button" class="equals" data-key="=">=</button>
+          </div>
+        </div>
+        <div class="calc-side">
+          <div class="calc-side-label">Functions</div>
+          <div class="calc-extra">
+            <button type="button" class="operation" data-key="pct" aria-label="Percentage of the displayed number">%</button>
+            <button type="button" class="operation" data-key="sqr" aria-label="Square">x²</button>
+            <button type="button" class="operation" data-key="sqrt" aria-label="Square root">√</button>
+            <button type="button" class="operation" data-key="inv" aria-label="Reciprocal">1/x</button>
+            <button type="button" class="operation" data-key="^" aria-label="Power">xʸ</button>
+            <button type="button" class="utility" data-key="pi" aria-label="Pi">π</button>
+            <button type="button" class="operation" data-key="fact" aria-label="Factorial">n!</button>
+            <button type="button" class="operation" data-key="log" aria-label="Logarithm base 10">log</button>
+            <button type="button" class="operation" data-key="ln" aria-label="Natural logarithm">ln</button>
+            <button type="button" class="operation" data-key="abs" aria-label="Absolute value">|x|</button>
+            <button type="button" class="utility" data-key="M+" aria-label="Add to memory">M+</button>
+            <button type="button" class="utility" data-key="M-" aria-label="Subtract from memory">M−</button>
+            <button type="button" class="utility" data-key="MR" aria-label="Recall memory">MR</button>
+            <button type="button" class="utility" data-key="MC" aria-label="Clear memory">MC</button>
+          </div>
+        </div>
+      </div>
+      <button class="use-result" type="button" id="useResult">Use result in converter</button>
+    </section>
+    <div class="toolbar"><div class="status" id="status" aria-live="polite">Loading exchange rates…</div><button id="refresh" type="button">↻ Refresh rates</button></div>
+    <section class="details" aria-label="Current exchange rates"><div><strong>Exchange rates</strong><div class="rate-list" id="rateList"></div></div><div class="status" style="font-size: .82rem;">Rates are indicative</div></section>
+    <footer>Live rates require an internet connection. If unavailable, the converter uses clearly labeled saved or reference rates; these may differ from bank or card rates. Data providers: <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">ExchangeRate-API</a> and <a href="https://www.frankfurter.app" target="_blank" rel="noopener">Frankfurter</a>.</footer>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      const catalog = [
+        { code: 'USD', name: 'US dollar', symbol: '$', flag: '🇺🇸' },
+        { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺' },
+        { code: 'JPY', name: 'Japanese yen', symbol: '¥', flag: '🇯🇵' },
+        { code: 'ILS', name: 'Israeli shekel', symbol: '₪', flag: '🇮🇱' },
+        { code: 'GBP', name: 'British pound', symbol: '£', flag: '🇬🇧' },
+        { code: 'CHF', name: 'Swiss franc', symbol: 'Fr', flag: '🇨🇭' },
+        { code: 'CAD', name: 'Canadian dollar', symbol: 'C$', flag: '🇨🇦' },
+        { code: 'AUD', name: 'Australian dollar', symbol: 'A$', flag: '🇦🇺' },
+        { code: 'CNY', name: 'Chinese yuan', symbol: '¥', flag: '🇨🇳' },
+        { code: 'KRW', name: 'South Korean won', symbol: '₩', flag: '🇰🇷' },
+        { code: 'INR', name: 'Indian rupee', symbol: '₹', flag: '🇮🇳' },
+        { code: 'SEK', name: 'Swedish krona', symbol: 'kr', flag: '🇸🇪' },
+        { code: 'NOK', name: 'Norwegian krone', symbol: 'kr', flag: '🇳🇴' },
+        { code: 'DKK', name: 'Danish krone', symbol: 'kr', flag: '🇩🇰' },
+        { code: 'PLN', name: 'Polish zloty', symbol: 'zł', flag: '🇵🇱' },
+        { code: 'CZK', name: 'Czech koruna', symbol: 'Kč', flag: '🇨🇿' },
+        { code: 'HUF', name: 'Hungarian forint', symbol: 'Ft', flag: '🇭🇺' },
+        { code: 'TRY', name: 'Turkish lira', symbol: '₺', flag: '🇹🇷' },
+        { code: 'BRL', name: 'Brazilian real', symbol: 'R$', flag: '🇧🇷' },
+        { code: 'MXN', name: 'Mexican peso', symbol: 'Mex$', flag: '🇲🇽' },
+        { code: 'SGD', name: 'Singapore dollar', symbol: 'S$', flag: '🇸🇬' },
+        { code: 'HKD', name: 'Hong Kong dollar', symbol: 'HK$', flag: '🇭🇰' },
+        { code: 'NZD', name: 'New Zealand dollar', symbol: 'NZ$', flag: '🇳🇿' },
+        { code: 'ZAR', name: 'South African rand', symbol: 'R', flag: '🇿🇦' },
+        { code: 'THB', name: 'Thai baht', symbol: '฿', flag: '🇹🇭' },
+        { code: 'AED', name: 'UAE dirham', symbol: 'د.إ', flag: '🇦🇪' }
+      ];
+      const moreCurrencies = [
+        ['RUB', 'Russian ruble', '₽', 'RU'], ['UAH', 'Ukrainian hryvnia', '₴', 'UA'], ['RON', 'Romanian leu', 'lei', 'RO'],
+        ['BGN', 'Bulgarian lev', 'лв', 'BG'], ['RSD', 'Serbian dinar', 'din', 'RS'], ['ISK', 'Icelandic krona', 'kr', 'IS'],
+        ['GEL', 'Georgian lari', '₾', 'GE'], ['AMD', 'Armenian dram', '֏', 'AM'], ['AZN', 'Azerbaijani manat', '₼', 'AZ'],
+        ['KZT', 'Kazakhstani tenge', '₸', 'KZ'], ['UZS', 'Uzbek som', "so'm", 'UZ'], ['BYN', 'Belarusian ruble', 'Br', 'BY'],
+        ['SAR', 'Saudi riyal', '﷼', 'SA'], ['QAR', 'Qatari riyal', '﷼', 'QA'], ['KWD', 'Kuwaiti dinar', 'د.ك', 'KW'],
+        ['BHD', 'Bahraini dinar', 'BD', 'BH'], ['OMR', 'Omani rial', '﷼', 'OM'], ['JOD', 'Jordanian dinar', 'JD', 'JO'],
+        ['EGP', 'Egyptian pound', 'E£', 'EG'], ['MAD', 'Moroccan dirham', 'DH', 'MA'], ['TND', 'Tunisian dinar', 'DT', 'TN'],
+        ['DZD', 'Algerian dinar', 'دج', 'DZ'], ['IQD', 'Iraqi dinar', 'ع.د', 'IQ'], ['LBP', 'Lebanese pound', 'L£', 'LB'],
+        ['TWD', 'New Taiwan dollar', 'NT$', 'TW'], ['PHP', 'Philippine peso', '₱', 'PH'], ['IDR', 'Indonesian rupiah', 'Rp', 'ID'],
+        ['MYR', 'Malaysian ringgit', 'RM', 'MY'], ['VND', 'Vietnamese dong', '₫', 'VN'], ['PKR', 'Pakistani rupee', '₨', 'PK'],
+        ['BDT', 'Bangladeshi taka', '৳', 'BD'], ['LKR', 'Sri Lankan rupee', 'Rs', 'LK'], ['NPR', 'Nepalese rupee', 'Rs', 'NP'],
+        ['KHR', 'Cambodian riel', '៛', 'KH'], ['MMK', 'Myanmar kyat', 'K', 'MM'], ['LAK', 'Lao kip', '₭', 'LA'],
+        ['MNT', 'Mongolian tugrik', '₮', 'MN'], ['BND', 'Brunei dollar', 'B$', 'BN'], ['MOP', 'Macanese pataca', 'MOP$', 'MO'],
+        ['ARS', 'Argentine peso', 'AR$', 'AR'], ['CLP', 'Chilean peso', 'CL$', 'CL'], ['COP', 'Colombian peso', 'COL$', 'CO'],
+        ['PEN', 'Peruvian sol', 'S/', 'PE'], ['UYU', 'Uruguayan peso', '$U', 'UY'], ['BOB', 'Bolivian boliviano', 'Bs', 'BO'],
+        ['PYG', 'Paraguayan guarani', '₲', 'PY'], ['CRC', 'Costa Rican colon', '₡', 'CR'], ['DOP', 'Dominican peso', 'RD$', 'DO'],
+        ['GTQ', 'Guatemalan quetzal', 'Q', 'GT'], ['JMD', 'Jamaican dollar', 'J$', 'JM'], ['TTD', 'Trinidad dollar', 'TT$', 'TT'],
+        ['NGN', 'Nigerian naira', '₦', 'NG'], ['KES', 'Kenyan shilling', 'KSh', 'KE'], ['GHS', 'Ghanaian cedi', '₵', 'GH'],
+        ['ETB', 'Ethiopian birr', 'Br', 'ET'], ['TZS', 'Tanzanian shilling', 'TSh', 'TZ'], ['UGX', 'Ugandan shilling', 'USh', 'UG'],
+        ['ZMW', 'Zambian kwacha', 'ZK', 'ZM'], ['BWP', 'Botswana pula', 'P', 'BW'], ['MUR', 'Mauritian rupee', '₨', 'MU'],
+        ['XOF', 'West African franc', 'CFA', ''], ['XAF', 'Central African franc', 'CFA', ''], ['XPF', 'CFP franc', 'Fr', ''],
+        ['FJD', 'Fijian dollar', 'FJ$', 'FJ'], ['PGK', 'Papua New Guinea kina', 'K', 'PG'], ['ALL', 'Albanian lek', 'L', 'AL'],
+        ['BAM', 'Bosnia mark', 'KM', 'BA'], ['MKD', 'Macedonian denar', 'den', 'MK'], ['MDL', 'Moldovan leu', 'L', 'MD'],
+        ['GIP', 'Gibraltar pound', '£', 'GI']
+      ].map(([code, name, symbol, country]) => ({
+        code, name, symbol,
+        flag: country ? [...country].map(letter => String.fromCodePoint(127397 + letter.charCodeAt(0))).join('') : '🌐'
+      }));
+      const directory = catalog.concat(moreCurrencies.filter(item => !catalog.some(known => known.code === item.code)));
+      const byCode = new Map(directory.map(item => [item.code, item]));
+      const defaultCodes = ['JPY', 'ILS', 'USD', 'EUR'];
+      const selectionKey = 'currency-studio-selection';
+      const minCurrencies = 2;
+      const maxCurrencies = 6;
+      let displayed = loadSelection();
+      const status = document.getElementById('status');
+      const refresh = document.getElementById('refresh');
+      const cardsEl = document.querySelector('.cards');
+      const editor = document.getElementById('currencyEditor');
+      const editBtn = document.getElementById('editCurrencies');
+      const choicesEl = document.getElementById('currencyChoices');
+      const editorNote = document.getElementById('editorNote');
+      const saveBtn = document.getElementById('saveCurrencies');
+      const searchEl = document.getElementById('currencySearch');
+      const resultsEl = document.getElementById('currencyResults');
+      // Verified exchange-rate snapshot, used if the browser cannot reach rate APIs.
+      const snapshot = { USD: 1, JPY: 157.874, ILS: 3.2187, EUR: 0.89488, date: 'Nov 6, 2026', source: 'snapshot' };
+      let rates = { ...snapshot };
+      let active = displayed.includes('USD') ? 'USD' : displayed[0];
+      let rawAmount = 0;
+      let draft = [];
+      function loadSelection() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(selectionKey) || 'null');
+          const known = new Set(directory.map(item => item.code));
+          if (Array.isArray(saved) && saved.length >= minCurrencies && saved.length <= maxCurrencies && saved.every(code => known.has(code))) return saved;
+        } catch (_) {}
+        return [...defaultCodes];
+      }
+      function currencyInfo(code) {
+        return byCode.get(code);
+      }
+      const fmt = n => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n);
+      const parse = value => {
+        const cleaned = value.replace(/,/g, '').replace(/\s/g, '').trim();
+        if (!cleaned || cleaned === '.' || cleaned === '-') return null;
+        const num = Number(cleaned);
+        return Number.isFinite(num) ? num : NaN;
+      };
+      const setStatus = (message, warning=false) => { status.textContent=message; status.classList.toggle('error',warning); };
+      function fmtRate(n) {
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: n < 20 ? 4 : 2 }).format(n);
+      }
+      function showRates() {
+        const lines = displayed.filter(code => code !== 'USD').map(code => {
+          const value = rates[code];
+          return `<span>${value > 0 ? `1 USD = ${fmtRate(value)} ${code}` : `1 USD = — ${code}`}</span>`;
+        });
+        document.getElementById('rateList').innerHTML = lines.join('');
+      }
+      function calculate() {
+        const canConvert = rates[active] > 0 && rawAmount !== null && !Number.isNaN(rawAmount);
+        for (const code of displayed) {
+          if (code === active) continue;
+          const input = document.getElementById(code);
+          if (!input) continue;
+          input.value = canConvert && rates[code] > 0 ? fmt(rawAmount / rates[active] * rates[code]) : '';
+        }
+      }
+      function paintAmounts() {
+        const input = document.getElementById(active);
+        if (input) input.value = rawAmount === null || Number.isNaN(rawAmount) ? '0' : fmt(rawAmount);
+        calculate();
+      }
+      const countWords = ['', '', 'Two', 'Three', 'Four', 'Five', 'Six'];
+      function renderCards() {
+        document.title = `Currency Studio | ${displayed.join(' · ')}`;
+        document.querySelector('.currencies h1').textContent = `${countWords[displayed.length]} currencies.`;
+        cardsEl.innerHTML = displayed.map(code => {
+          const item = currencyInfo(code);
+          return `<article class="card"><div class="top"><span class="flag" aria-hidden="true">${item.flag}</span><span class="code">${item.code}</span></div><div class="name">${item.name}</div><label class="entry"><span class="symbol">${item.symbol}</span><input id="${item.code}" data-code="${item.code}" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="${item.name} amount" placeholder="0" value="0" /></label><button type="button" class="add-calc" data-code="${item.code}">Add to Calc</button></article>`;
+        }).join('');
+      }
+      function formatEditingField(input) {
+        const before = input.value;
+        const caret = input.selectionStart ?? before.length;
+        const prefixLength = before.slice(0, caret).replace(/,/g, '').length;
+        // Keep a trailing decimal separator and typed decimal zeros while editing.
+        const clean = before.replace(/,/g, '').replace(/[^\d.]/g, '');
+        const dotIndex = clean.indexOf('.');
+        const normalized = dotIndex < 0 ? clean : clean.slice(0, dotIndex + 1) + clean.slice(dotIndex + 1).replace(/\./g, '');
+        const parts = normalized.split('.');
+        const intPart = (parts[0] || '').replace(/^0+(?=\d)/, '');
+        const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        const formatted = grouped + (parts.length > 1 ? '.' + parts[1] : '');
+        input.value = formatted;
+        let position = 0, seen = 0;
+        while (position < formatted.length && seen < prefixLength) {
+          if (formatted[position] !== ',') seen++;
+          position++;
+        }
+        input.setSelectionRange(position, position);
+      }
+      cardsEl.addEventListener('input', event => {
+        const input = event.target.closest('input[data-code]');
+        if (!input) return;
+        const code = input.dataset.code;
+        active = code;
+        if (input.dataset.freshZero === '1') {
+          const caret = input.selectionStart ?? 0;
+          let text = input.value.replace(/,/g, '');
+          if (text === '.0' && caret === 1) text = '0.';
+          else if (caret === text.length && text.length > 1 && text.startsWith('0') && text[1] !== '.') text = text.slice(1);
+          else if (caret === text.length - 1 && text.endsWith('0') && text.length > 1 && !text.includes('.')) text = text.slice(0, -1);
+          input.value = text;
+          const next = text === '0.' ? 2 : text.length;
+          input.setSelectionRange(next, next);
+          input.dataset.freshZero = '0';
+        }
+        formatEditingField(input);
+        rawAmount = parse(input.value);
+        if (Number.isNaN(rawAmount)) {
+          setStatus('Enter a valid number.', true);
+          for (const other of displayed) if (other !== code) {
+            const field = document.getElementById(other);
+            if (field) field.value = '';
+          }
+          return;
+        }
+        updateStatus();
+        calculate();
+      });
+      cardsEl.addEventListener('pointerdown', event => {
+        const input = event.target.closest('input[data-code]');
+        if (!input || document.activeElement === input || parse(input.value) !== 0) return;
+        event.preventDefault();
+        input.focus();
+        input.select();
+      });
+      cardsEl.addEventListener('focus', event => {
+        const input = event.target.closest('input[data-code]');
+        if (!input) return;
+        active = input.dataset.code;
+        rawAmount = parse(input.value);
+        input.dataset.freshZero = rawAmount === 0 ? '1' : '0';
+        if (rawAmount === 0) input.select();
+      }, true);
+      cardsEl.addEventListener('blur', event => {
+        const input = event.target.closest('input[data-code]');
+        if (!input || input.dataset.code !== active) return;
+        if (rawAmount !== null && Number.isFinite(rawAmount)) input.value = fmt(rawAmount);
+        else if (rawAmount === null || Number.isNaN(rawAmount)) {
+          rawAmount = 0;
+          input.value = '0';
+          for (const other of displayed) if (other !== active) {
+            const field = document.getElementById(other);
+            if (field) field.value = '0';
+          }
+          updateStatus();
+        }
+      }, true);
+      function updateStatus() {
+        const missing = displayed.filter(code => code !== 'USD' && !(rates[code] > 0));
+        if (missing.length) { setStatus(`No exchange rate yet for ${missing.join(', ')}.`, true); return; }
+        if (rates.source === 'live') setStatus(`Live rates · updated ${rates.date}`);
+        else if (rates.source === 'cached') setStatus(`Saved rates · updated ${rates.date} · refresh for latest`, true);
+        else setStatus(`Using reference rates from ${rates.date} · refresh for latest`, true);
+      }
+      function quoteCovers(quote) {
+        return displayed.every(code => code === 'USD' || Number(quote?.[code]) > 0);
+      }
+      function storeRates(quote, date, source) {
+        const next = { ...rates, USD: 1, date, source };
+        for (const [key, value] of Object.entries(quote || {})) {
+          if (typeof value === 'number' && value > 0) next[key] = value;
+        }
+        next.USD = 1;
+        next.date = date;
+        next.source = source;
+        rates = next;
+        try { localStorage.setItem('four-currency-rates', JSON.stringify(rates)); } catch (_) {}
+      }
+      async function fetchWithTimeout(url) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
+        try {
+          const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return await response.json();
+        } finally { clearTimeout(timeout); }
+      }
+      async function loadRates() {
+        refresh.disabled = true;
+        setStatus('Checking latest rates…');
+        const symbols = displayed.filter(code => code !== 'USD').join(',');
+        try {
+          let quote, date;
+          try {
+            const data = await fetchWithTimeout('https://open.er-api.com/v6/latest/USD');
+            if (data.result !== 'success' || !quoteCovers(data.rates)) throw Error('Invalid rates');
+            quote = data.rates;
+            date = data.time_last_update_utc ? new Date(data.time_last_update_utc).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) : 'latest';
+          } catch (_) {
+            try {
+              const data = await fetchWithTimeout(`https://api.frankfurter.dev/v1/latest?base=USD&symbols=${symbols}`);
+              if (!quoteCovers(data.rates)) throw Error('Invalid rates');
+              quote = data.rates; date = data.date;
+            } catch (_) {
+              const data = await fetchWithTimeout('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+              quote = {};
+              for (const code of displayed) {
+                if (code === 'USD') continue;
+                const value = data.usd?.[code.toLowerCase()];
+                if (value > 0) quote[code] = value;
+              }
+              if (!quoteCovers(quote)) throw Error('Invalid rates');
+              date = data.date;
+            }
+          }
+          storeRates(quote, date, 'live');
+          showRates(); calculate(); updateStatus();
+        } catch (_) {
+          showRates(); calculate(); updateStatus();
+        } finally { refresh.disabled = false; }
+      }
+      try {
+        const saved = JSON.parse(localStorage.getItem('four-currency-rates') || 'null');
+        if (saved && saved.date && saved.USD > 0) {
+          const next = { USD: 1, date: saved.date, source: 'cached' };
+          for (const [key, value] of Object.entries(saved)) {
+            if (typeof value === 'number' && value > 0) next[key] = value;
+          }
+          rates = next;
+        }
+      } catch (_) {}
+      // Compact calculator plus square, root, power, logs, factorial, and memory.
+      const calcDisplay = document.getElementById('calcDisplay');
+      const calcHistory = document.getElementById('calcHistory');
+      const calcMemory = document.getElementById('calcMemory');
+      const calcTarget = document.getElementById('calcTarget');
+      const binaryOps = ['+', '-', '*', '/', '^'];
+      const opSymbols = { '/': '÷', '*': '×', '-': '−', '+': '+', '^': 'xʸ' };
+      let calcEntry = '0', calcPrevious = null, calcOperator = null, calcNewEntry = false;
+      let calcError = false;
+      let memory = 0;
+      let trail = '';
+      let termText = null;
+      let solved = false;
+      let pctBaseText = '';
+      function showCalc() {
+        const n = Number(calcEntry);
+        calcDisplay.textContent = calcError ? 'Error' : (Number.isFinite(n) ? fmtEdit(calcEntry) : 'Error');
+        calcHistory.textContent = buildHistory();
+        calcMemory.textContent = memory !== 0 ? 'M' : '';
+      }
+      function buildHistory() {
+        if (calcError) return trail;
+        if (calcOperator === 'pct') {
+          const typed = calcNewEntry && calcEntry === '0' ? '' : fmtEdit(calcEntry);
+          return typed ? `${typed}% of ${pctBaseText}` : `% of ${pctBaseText}`;
+        }
+        if (solved) return trail;
+        if (termText) return `${trail}${termText}`.trim();
+        if (calcNewEntry) return trail.trim();
+        if (!trail) return '';
+        return `${trail}${fmtEdit(calcEntry)}`.trim();
+      }
+      function clearTrail() {
+        trail = '';
+        termText = null;
+        solved = false;
+        pctBaseText = '';
+      }
+      function fmtEdit(v) {
+        const neg = v.startsWith('-') ? '-' : '';
+        const pieces = v.replace(/^-/, '').split('.');
+        return neg + (pieces[0] || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (pieces.length > 1 ? '.' + pieces[1] : '');
+      }
+      function operate(a, b, op) {
+        if (op === '+') return a+b;
+        if (op === '-') return a-b;
+        if (op === '*') return a*b;
+        if (op === '/') return b === 0 ? NaN : a/b;
+        if (op === '^') return Math.pow(a, b);
+        if (op === 'pct') return a * b / 100;
+        return b;
+      }
+      function factorial(n) {
+        if (n < 0 || n > 170 || !Number.isInteger(n)) return NaN;
+        let result = 1;
+        for (let i = 2; i <= n; i++) result *= i;
+        return result;
+      }
+      function storeResult(result) {
+        if (!Number.isFinite(result)) { calcError = true; return false; }
+        calcEntry = String(Number(result.toPrecision(13)));
+        calcNewEntry = true;
+        return true;
+      }
+      function currentTerm() {
+        return termText || fmtEdit(calcEntry);
+      }
+      function unary(result, formatTerm) {
+        const piece = formatTerm(currentTerm());
+        const pending = Boolean(calcOperator) && calcOperator !== 'pct' && !calcNewEntry;
+        if (!storeResult(result)) {
+          trail = `${trail}${piece}`.trim();
+          termText = null;
+          showCalc();
+          return;
+        }
+        if (pending) termText = piece;
+        else {
+          trail = `${piece} = ${fmtEdit(calcEntry)}`;
+          termText = null;
+          solved = true;
+          calcOperator = null;
+          calcPrevious = null;
+        }
+        showCalc();
+      }
+      function beginOperator(key) {
+        const symbol = opSymbols[key];
+        const term = currentTerm();
+        if (solved) {
+          trail = `${fmtEdit(calcEntry)} ${symbol} `;
+          termText = null;
+          solved = false;
+          calcPrevious = Number(calcEntry);
+          calcOperator = key;
+          calcNewEntry = true;
+          return;
+        }
+        if (calcNewEntry && calcOperator && calcOperator !== 'pct') {
+          trail = trail.replace(/\s\S+\s*$/, ` ${symbol} `);
+          calcOperator = key;
+          return;
+        }
+        if (calcOperator && calcPrevious !== null && !calcNewEntry) {
+          const nextTrail = `${trail}${term} ${symbol} `;
+          termText = null;
+          if (!storeResult(operate(calcPrevious, Number(calcEntry), calcOperator))) {
+            trail = nextTrail.trim();
+            showCalc();
+            return;
+          }
+          trail = nextTrail;
+        } else {
+          trail = `${term} ${symbol} `;
+          termText = null;
+        }
+        solved = false;
+        calcPrevious = Number(calcEntry);
+        calcOperator = key;
+        calcNewEntry = true;
+      }
+      function calcKey(key) {
+        if (key === 'C') { calcEntry='0'; calcPrevious=null; calcOperator=null; calcNewEntry=false; calcError=false; clearTrail(); showCalc(); return; }
+        if (key === 'MC') { memory = 0; showCalc(); return; }
+        if (calcError && key !== 'MR' && key !== 'C') return;
+        if (/^\d$/.test(key)) {
+          if (calcNewEntry) {
+            if (solved) trail = '';
+            termText = null;
+            solved = false;
+            calcEntry = key;
+            calcNewEntry = false;
+          }
+          else if (calcEntry.replace(/\D/g,'').length < 15) calcEntry = calcEntry === '0' ? key : calcEntry + key;
+        } else if (key === '.') {
+          if (calcNewEntry) {
+            if (solved) trail = '';
+            termText = null;
+            solved = false;
+            calcEntry = '0.';
+            calcNewEntry = false;
+          }
+          else if (!calcEntry.includes('.')) calcEntry += '.';
+        } else if (key === 'back') {
+          if (termText) { termText = null; calcEntry = '0'; calcNewEntry = false; }
+          else { calcEntry = calcNewEntry ? '0' : (calcEntry.length <= 1 || calcEntry === '-0' ? '0' : calcEntry.slice(0, -1)); calcNewEntry = false; }
+        }
+        else if (key === 'sign') {
+          calcEntry = String(-Number(calcEntry));
+          if (termText) termText = termText.startsWith('−(') && termText.endsWith(')') ? termText.slice(2, -1) : `−(${termText})`;
+        }
+        else if (key === '%') unary(Number(calcEntry) / 100, shown => `${shown}%`);
+        else if (key === 'pct') {
+          if (!(calcOperator === 'pct' && calcNewEntry)) {
+            let baseText = currentTerm();
+            if (calcOperator && calcOperator !== 'pct' && calcPrevious !== null && !calcNewEntry) {
+              baseText = `${trail}${baseText}`.trim();
+              if (!storeResult(operate(calcPrevious, Number(calcEntry), calcOperator))) {
+                trail = baseText;
+                showCalc();
+                return;
+              }
+            }
+            pctBaseText = /[+\-−×÷]/.test(baseText) ? `(${baseText})` : baseText;
+            calcPrevious = Number(calcEntry);
+          }
+          calcOperator = 'pct';
+          calcEntry = '0';
+          calcNewEntry = true;
+          termText = null;
+          solved = false;
+          trail = '';
+        }
+        else if (key === 'sqr') { unary(Number(calcEntry) ** 2, shown => `${shown}²`); return; }
+        else if (key === 'sqrt') { const n = Number(calcEntry); unary(n < 0 ? NaN : Math.sqrt(n), shown => `√(${shown})`); return; }
+        else if (key === 'inv') { const n = Number(calcEntry); unary(n === 0 ? NaN : 1 / n, shown => `1/(${shown})`); return; }
+        else if (key === 'abs') { unary(Math.abs(Number(calcEntry)), shown => `|${shown}|`); return; }
+        else if (key === 'fact') { unary(factorial(Number(calcEntry)), shown => `${shown}!`); return; }
+        else if (key === 'log') { const n = Number(calcEntry); unary(n > 0 ? Math.log10(n) : NaN, shown => `log(${shown})`); return; }
+        else if (key === 'ln') { const n = Number(calcEntry); unary(n > 0 ? Math.log(n) : NaN, shown => `ln(${shown})`); return; }
+        else if (key === 'pi') {
+          if (solved) { trail = ''; solved = false; }
+          if (calcNewEntry) termText = null;
+          calcEntry = String(Number(Math.PI.toPrecision(12)));
+          termText = 'π';
+          calcNewEntry = true;
+          calcError = false;
+        }
+        else if (key === 'M+') { memory += Number(calcEntry); }
+        else if (key === 'M-') { memory -= Number(calcEntry); }
+        else if (key === 'MR') {
+          if (solved) { trail = ''; solved = false; }
+          calcEntry = String(Number(memory.toPrecision(13)));
+          termText = memory !== 0 ? 'MR' : null;
+          calcNewEntry = true;
+          calcError = false;
+        }
+        else if (binaryOps.includes(key)) beginOperator(key);
+        else if (key === '=' && calcOperator && calcPrevious !== null) {
+          if (calcOperator === 'pct') {
+            const percentText = calcNewEntry && calcEntry === '0' ? '0' : fmtEdit(calcEntry);
+            const phrase = `${percentText}% of ${pctBaseText}`;
+            if (!storeResult(operate(calcPrevious, Number(calcEntry), 'pct'))) { trail = phrase; showCalc(); return; }
+            trail = `${phrase} = ${fmtEdit(calcEntry)}`;
+            pctBaseText = '';
+          } else {
+            const phrase = `${trail}${currentTerm()}`.trim();
+            if (!storeResult(operate(calcPrevious, Number(calcEntry), calcOperator))) { trail = phrase; showCalc(); return; }
+            trail = `${phrase} = ${fmtEdit(calcEntry)}`;
+          }
+          termText = null;
+          calcPrevious = null;
+          calcOperator = null;
+          solved = true;
+        }
+        showCalc();
+      }
+      document.getElementById('calcKeys').addEventListener('click', e => {
+        const button=e.target.closest('button[data-key]');
+        if (button) calcKey(button.dataset.key);
+      });
+      function syncCalcTarget() {
+        const current = calcTarget.value;
+        calcTarget.innerHTML = displayed.map(code => `<option value="${code}">${code}</option>`).join('');
+        calcTarget.value = displayed.includes(current) ? current : (displayed.includes('USD') ? 'USD' : displayed[0]);
+      }
+      function choiceButton(item) {
+        const on = draft.includes(item.code);
+        return `<button type="button" class="choice${on ? ' on' : ''}" data-choice="${item.code}" aria-pressed="${on}"><span aria-hidden="true">${item.flag}</span>${item.code}<small>${item.name}</small></button>`;
+      }
+      function listedChoices() {
+        const common = new Set(catalog.map(item => item.code));
+        const extras = draft.map(currencyInfo).filter(item => item && !common.has(item.code));
+        return catalog.concat(extras);
+      }
+      function renderChoices(message) {
+        choicesEl.innerHTML = listedChoices().map(choiceButton).join('');
+        const count = draft.length;
+        editorNote.textContent = message || (count < minCurrencies ? 'Choose at least 2 currencies.' : `${count} selected.`);
+        saveBtn.disabled = count < minCurrencies || count > maxCurrencies;
+      }
+      function searchMatches(query) {
+        const text = query.trim().toLowerCase();
+        if (!text) return [];
+        const starts = [];
+        const contains = [];
+        for (const item of directory) {
+          const code = item.code.toLowerCase();
+          const name = item.name.toLowerCase();
+          if (code.startsWith(text) || name.startsWith(text)) starts.push(item);
+          else if (code.includes(text) || name.includes(text)) contains.push(item);
+        }
+        return starts.concat(contains).slice(0, 8);
+      }
+      function renderSearch() {
+        const query = searchEl.value;
+        const matches = searchMatches(query);
+        if (!query.trim()) { resultsEl.hidden = true; resultsEl.innerHTML = ''; return; }
+        resultsEl.hidden = false;
+        resultsEl.innerHTML = matches.length
+          ? matches.map(choiceButton).join('')
+          : '<p class="search-empty">No currency found.</p>';
+      }
+      function openEditor() {
+        draft = [...displayed];
+        searchEl.value = '';
+        renderChoices();
+        renderSearch();
+        editor.hidden = false;
+        editBtn.setAttribute('aria-expanded', 'true');
+        searchEl.focus();
+      }
+      function closeEditor() {
+        editor.hidden = true;
+        editBtn.setAttribute('aria-expanded', 'false');
+        searchEl.value = '';
+        resultsEl.hidden = true;
+        resultsEl.innerHTML = '';
+        draft = [];
+      }
+      function saveEditor() {
+        if (draft.length < minCurrencies || draft.length > maxCurrencies) return;
+        const usdValue = rates[active] > 0 && rawAmount !== null && !Number.isNaN(rawAmount) ? rawAmount / rates[active] : 0;
+        displayed = [...draft];
+        try { localStorage.setItem(selectionKey, JSON.stringify(displayed)); } catch (_) {}
+        if (!displayed.includes(active)) active = displayed.includes('USD') ? 'USD' : displayed[0];
+        rawAmount = rates[active] > 0 ? usdValue * rates[active] : 0;
+        renderCards();
+        syncCalcTarget();
+        closeEditor();
+        if (displayed.some(code => !(rates[code] > 0))) loadRates();
+        else { showRates(); paintAmounts(); updateStatus(); }
+      }
+      editBtn.addEventListener('click', () => { editor.hidden ? openEditor() : closeEditor(); });
+      document.getElementById('cancelCurrencies').addEventListener('click', closeEditor);
+      saveBtn.addEventListener('click', saveEditor);
+      searchEl.addEventListener('input', renderSearch);
+      searchEl.addEventListener('keydown', event => {
+        if (event.key !== 'Enter') return;
+        const first = resultsEl.querySelector('[data-choice]');
+        if (!first) return;
+        event.preventDefault();
+        first.click();
+      });
+      editor.addEventListener('click', event => {
+        const button = event.target.closest('[data-choice]');
+        if (!button) return;
+        const code = button.dataset.choice;
+        const fromSearch = Boolean(button.closest('#currencyResults'));
+        if (draft.includes(code)) draft = draft.filter(item => item !== code);
+        else if (draft.length >= maxCurrencies) {
+          renderChoices('You can show up to 6 currencies. Turn one off before adding another.');
+          renderSearch();
+          return;
+        } else draft.push(code);
+        if (fromSearch) searchEl.value = '';
+        renderChoices();
+        renderSearch();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !editor.hidden) {
+          event.preventDefault();
+          if (searchEl.value) { searchEl.value = ''; renderSearch(); return; }
+          closeEditor();
+          return;
+        }
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'SELECT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+        if (event.metaKey || event.ctrlKey || event.altKey) return;
+        const key = event.key;
+        let mapped = null;
+        if (/^[0-9]$/.test(key)) mapped = key;
+        else if (key === '.' || key === ',') mapped = '.';
+        else if (key === '+' || key === '-' || key === '*' || key === '/') mapped = key;
+        else if (key === 'x' || key === 'X') mapped = '*';
+        else if (key === 'Enter' || key === '=') mapped = '=';
+        else if (key === 'Backspace') mapped = 'back';
+        else if (key === 'Escape' || key === 'Delete' || key === 'c' || key === 'C') mapped = 'C';
+        else if (key === '%') mapped = 'pct';
+        else if (key === '^') mapped = '^';
+        else if (key === '!') mapped = 'fact';
+        else if (key === 's' || key === 'S') mapped = 'sqr';
+        else if (key === 'r' || key === 'R') mapped = 'sqrt';
+        else if (key === 'i' || key === 'I') mapped = 'inv';
+        else if (key === 'p' || key === 'P') mapped = 'pi';
+        else if (key === 'l' || key === 'L') mapped = event.shiftKey ? 'ln' : 'log';
+        else if (key === 'a' || key === 'A') mapped = 'abs';
+        if (!mapped) return;
+        event.preventDefault();
+        calcKey(mapped);
+      });
+      document.querySelector('.cards').addEventListener('click', event => {
+        const button = event.target.closest('button[data-code]');
+        if (!button) return;
+        const field = document.getElementById(button.dataset.code);
+        const amount = field ? parse(field.value) : null;
+        if (amount === null || !Number.isFinite(amount)) return;
+        calcError = false;
+        if (solved) clearTrail();
+        calcEntry = String(Number(amount.toPrecision(13)));
+        termText = null;
+        calcNewEntry = false;
+        showCalc();
+      });
+      document.getElementById('useResult').addEventListener('click', () => {
+        if (calcError || !Number.isFinite(Number(calcEntry))) return;
+        const code=calcTarget.value;
+        const field=document.getElementById(code);
+        if (!field) return;
+        active=code; rawAmount=Number(calcEntry);
+        field.value=fmt(rawAmount);
+        calculate();
+        field.focus();
+      });
+      function resetAll() {
+        active = displayed.includes('USD') ? 'USD' : displayed[0];
+        rawAmount = 0;
+        for (const code of displayed) {
+          const field = document.getElementById(code);
+          if (field) field.value = '0';
+        }
+        calcEntry = '0';
+        calcPrevious = null;
+        calcOperator = null;
+        calcNewEntry = false;
+        calcError = false;
+        memory = 0;
+        clearTrail();
+        syncCalcTarget();
+        if (displayed.includes('USD')) calcTarget.value = 'USD';
+        showCalc();
+        updateStatus();
+      }
+      renderCards();
+      syncCalcTarget();
+      showCalc();
+      showRates();
+      paintAmounts();
+      updateStatus();
+      document.getElementById('reset').addEventListener('click', resetAll);
+      refresh.addEventListener('click', loadRates);
+      loadRates();
+    })();
+  </script>
+  <!-- Currency Studio: GA4 custom events -->
+  <script>
+    (function () {
+      "use strict";
+
+      function track(eventName, parameters = {}) {
+        if (typeof window.gtag === "function") {
+          window.gtag("event", eventName, {
+            send_to: "G-7J8ZHP8N7T",
+            ...parameters
+          });
+        }
+      }
+
+      // Track whichever currency amount the visitor selects.
+      document.addEventListener("focusin", function (event) {
+        const input = event.target;
+        if (input instanceof HTMLInputElement && input.dataset.code && input.closest(".cards")) {
+          track("currency_selected", { currency_code: input.dataset.code });
+        }
+      });
+
+      // Track calculator usage once per page visit.
+      let calculatorTracked = false;
+      document.addEventListener("click", function (event) {
+        const calculatorControl = event.target.closest("#calcKeys button, .calculator button");
+        if (calculatorControl && !calculatorTracked) {
+          calculatorTracked = true;
+          track("calculator_used");
+        }
+      });
+
+      // Track manual exchange-rate refreshes.
+      document.addEventListener("click", function (event) {
+        const button = event.target.closest("button");
+        if (!button) return;
+        if (button.id === "refresh" || /refresh rates/i.test(button.textContent || "")) {
+          track("rates_refreshed");
+        }
+      });
+    })();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+      });
+    }
+  </script>
+</body>
+</html>
